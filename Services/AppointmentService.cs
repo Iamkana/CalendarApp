@@ -14,8 +14,6 @@ public class AppointmentService : IAppointmentService
         _db = db;
     }
 
-    // ── Queries ──────────────────────────────────────────────────────────────
-    public IEnumerable<Appointment> GetAll() => _db.Appointments.AsNoTracking().ToList();
 
     public IEnumerable<Appointment> GetByUser(string ownerId)
     {

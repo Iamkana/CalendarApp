@@ -21,7 +21,6 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<AppUser>(entity =>
         {
             entity.HasKey(e => e.Id);
-            entity.Ignore(e => e.AvatarInitials);
         });
 
         // Appointment Configuration

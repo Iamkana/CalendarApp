@@ -45,7 +45,6 @@ public class AuthService
             FullName = fullName.Trim(),
             Email    = email.Trim(),
             Password = password,
-            AvatarColor = "#4285f4",
         };
         
         _db.Users.Add(newUser);

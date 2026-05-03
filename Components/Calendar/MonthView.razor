@@ -75,7 +75,7 @@
     }
 
     private IEnumerable<Appointment> GetFor(DateTime day) =>
-        _appointments.Where(a => a.StartTime.Date == day.Date);
+        _appointments.Where(a => a.StartTime.Date <= day.Date && a.EndTime.Date >= day.Date);
 
     private void OnCellClick(DateTime day) => State.OpenAddForm(day.Date.AddHours(9));
 

@@ -4,7 +4,6 @@ namespace CalendarApp.Services;
 
 public interface IAppointmentService
 {
-    IEnumerable<Appointment> GetAll();
     IEnumerable<Appointment> GetByUser(string ownerId);
     void AddAppointment(Appointment appointment);
     void DeleteAppointment(Guid id);
