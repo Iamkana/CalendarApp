@@ -46,10 +46,12 @@ public class AppointmentService : IAppointmentService
     public void ReplaceAppointment(Guid oldId, Appointment newAppointment)
     {
         var old = _db.Appointments.FirstOrDefault(a => a.Id == oldId);
-        if (old is null) return;
+        if (old is not null)
+        {
+            _db.Appointments.Remove(old);
+        }
         
-        _db.Entry(old).CurrentValues.SetValues(newAppointment);
-        old.Attendees = newAppointment.Attendees; // Update the list
+        _db.Appointments.Add(newAppointment);
         _db.SaveChanges();
         
         OnAppointmentsChanged?.Invoke();
@@ -74,7 +76,6 @@ public class AppointmentService : IAppointmentService
         return appointments.FirstOrDefault(a =>
             a.Id != appointment.Id &&
             (a.OwnerId == appointment.OwnerId || a.Attendees.Contains(appointment.OwnerId)) &&
-            !a.IsAllDay &&
             a.StartTime < appointment.EndTime &&
             a.EndTime   > appointment.StartTime);
     }

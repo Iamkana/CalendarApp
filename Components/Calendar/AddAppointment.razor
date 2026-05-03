@@ -43,22 +43,6 @@
                 </div>
             </div>
 
-            <!-- All-day toggle -->
-            <div class="ap-row">
-                <span class="ap-icon"></span>
-                <label class="checkbox-label">
-                    <input type="checkbox" @bind="_isAllDay" />
-                    <span class="checkbox-box" style="background:@(_isAllDay ? "var(--accent-blue)" : "transparent")">
-                        @if (_isAllDay)
-                        {
-                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                                <path d="M2 6l3 3 5-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                        }
-                    </span>
-                    <span>Cả ngày</span>
-                </label>
-            </div>
 
             <!-- Location -->
             <div class="ap-row">
@@ -66,15 +50,6 @@
                 <input class="input-field" id="appt-location" placeholder="Thêm địa điểm" @bind="_location" />
             </div>
 
-            <!-- Color group -->
-            <div class="ap-row">
-                <span class="ap-icon">📅</span>
-                <select class="input-select" id="appt-group" @bind="_colorGroup" @bind:after="OnGroupChanged">
-                    <option value="Thịnh Đặng Bá">Thịnh Đặng Bá</option>
-                    <option value="Gia đình">Gia đình</option>
-                    <option value="Tasks">Tasks</option>
-                </select>
-            </div>
 
             <!-- Color picker -->
             <div class="ap-row">
@@ -155,9 +130,9 @@
     private string   _location     = string.Empty;
     private DateTime _start        = DateTime.Now;
     private DateTime _end          = DateTime.Now.AddHours(1);
-    private bool     _isAllDay;
+
     private bool     _isGroupMeeting;
-    private string   _colorGroup   = "Thịnh Đặng Bá";
+
     private string   _color        = "#4285f4";
     private int      _reminderMinutes = 0;
 
@@ -172,12 +147,7 @@
         "#a142f4","#f06292","#ff7043","#26a69a","#78909c"
     };
 
-    private static readonly Dictionary<string, string> GroupDefaultColor = new()
-    {
-        ["Thịnh Đặng Bá"] = "#4285f4",
-        ["Gia đình"]       = "#34a853",
-        ["Tasks"]          = "#00bcd4",
-    };
+
 
     private string _startStr => _start.ToString("yyyy-MM-ddTHH:mm");
     private string _endStr   => _end.ToString("yyyy-MM-ddTHH:mm");
@@ -206,9 +176,9 @@
     {
         _name            = string.Empty;
         _location        = string.Empty;
-        _isAllDay        = false;
+
         _isGroupMeeting  = false;
-        _colorGroup      = "Thịnh Đặng Bá";
+
         _color           = "#4285f4";
         _reminderMinutes = 0;
         _conflictAppt    = null;
@@ -234,11 +204,6 @@
         ClearAlert();
     }
 
-    private void OnGroupChanged()
-    {
-        if (GroupDefaultColor.TryGetValue(_colorGroup, out var c))
-            _color = c;
-    }
 
     private void Close() => State.CloseAddForm();
 
@@ -292,11 +257,11 @@
         Location         = _location.Trim(),
         StartTime        = _start,
         EndTime          = _end,
-        IsAllDay         = _isAllDay,
+
         IsGroupMeeting   = _isGroupMeeting,
         ReminderMinutes  = _reminderMinutes,
         OwnerId          = AuthService.CurrentUser?.Id ?? string.Empty,
-        ColorGroup       = _colorGroup,
+
         Color            = _color,
         Attendees        = _isGroupMeeting
                               ? new List<string> { AuthService.CurrentUser?.Id ?? string.Empty }

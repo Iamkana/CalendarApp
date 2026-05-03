@@ -1,0 +1,114 @@
+@using CalendarApp.Services
+@implements IDisposable
+@inject INotificationService NotificationService
+
+@if (_currentNotification != null)
+{
+    <div class="notification-toast @_animationClass" style="border-left: 5px solid @_currentNotification.Color">
+        <div class="nt-content">
+            <div class="nt-title">@_currentNotification.Title</div>
+            <div class="nt-message">@_currentNotification.Message</div>
+        </div>
+        <button class="nt-close" @onclick="Close">✕</button>
+    </div>
+}
+
+<style>
+    .notification-toast {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        background: var(--bg-secondary);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        border-radius: 8px;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        z-index: 9999;
+        min-width: 300px;
+        max-width: 400px;
+        animation: slideIn 0.3s ease-out;
+        color: var(--text-primary);
+    }
+
+    .notification-toast.fade-out {
+        animation: slideOut 0.3s ease-in forwards;
+    }
+
+    .nt-content {
+        flex: 1;
+    }
+
+    .nt-title {
+        font-weight: 600;
+        font-size: 14px;
+        margin-bottom: 4px;
+    }
+
+    .nt-message {
+        font-size: 13px;
+        color: var(--text-secondary);
+    }
+
+    .nt-close {
+        background: transparent;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        font-size: 16px;
+        padding: 4px;
+    }
+
+    .nt-close:hover {
+        color: var(--text-primary);
+    }
+
+    @@keyframes slideIn {
+        from { transform: translateX(120%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+
+    @@keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(120%); opacity: 0; }
+    }
+</style>
+
+@code {
+    private NotificationMessage? _currentNotification;
+    private string _animationClass = "";
+
+    protected override void OnInitialized()
+    {
+        NotificationService.OnNotificationReceived += HandleNotification;
+    }
+
+    private async void HandleNotification(NotificationMessage message)
+    {
+        await InvokeAsync(() => {
+            _currentNotification = message;
+            _animationClass = "";
+            StateHasChanged();
+        });
+    }
+
+    private void Close()
+    {
+        _animationClass = "fade-out";
+        StateHasChanged();
+        
+        // Remove after animation
+        Task.Delay(300).ContinueWith(_ => {
+            InvokeAsync(() => {
+                _currentNotification = null;
+                StateHasChanged();
+            });
+        });
+    }
+
+    public void Dispose()
+    {
+        NotificationService.OnNotificationReceived -= HandleNotification;
+    }
+}

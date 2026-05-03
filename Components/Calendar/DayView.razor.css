@@ -22,23 +22,7 @@
 }
 .date-big.today-circle { background:var(--accent-blue); color:#fff; font-weight:600; }
 
-/* ── All-day strip ──────────────────────────────────────── */
-.day-allday-strip {
-    display: grid;
-    grid-template-columns: var(--gutter-width) 1fr;
-    min-height: 28px;
-    border-bottom: 1px solid var(--border-color);
-    flex-shrink: 0;
-}
-.allday-lbl {
-    font-size:10px; color:var(--text-secondary);
-    display:flex; align-items:center;
-    justify-content:flex-end; padding-right:8px;
-}
-.allday-area {
-    border-left:1px solid var(--border-color);
-    padding:3px 4px; display:flex; flex-direction:column; gap:2px;
-}
+
 
 /* ── Scrollable time body ───────────────────────────────── */
 .time-body-day {

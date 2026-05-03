@@ -15,16 +15,6 @@
         </div>
     </div>
 
-    <!-- All-day strip -->
-    <div class="day-allday-strip">
-        <div class="gutter-cell allday-lbl">Cả ngày</div>
-        <div class="allday-area">
-            @foreach (var a in _allDay)
-            {
-                <div class="event-pill" style="background:@a.Color">@a.Name</div>
-            }
-        </div>
-    </div>
 
     <!-- Scrollable body -->
     <div class="time-body-day" @onmouseup="OnBodyMouseUp" @onmouseleave="CancelDrag">
@@ -60,8 +50,17 @@
                 <!-- Events -->
                 @foreach (var appt in _timed)
                 {
-                    var top    = appt.StartTime.Hour * 60 + appt.StartTime.Minute;
-                    var height = Math.Max(22, (int)appt.Duration.TotalMinutes);
+                    var isStartDay = appt.StartTime.Date == State.CurrentDate.Date;
+                    var isEndDay   = appt.EndTime.Date == State.CurrentDate.Date;
+
+                    if (!isStartDay && isEndDay && appt.EndTime.Hour == 0 && appt.EndTime.Minute == 0)
+                        continue; // Ends exactly at midnight
+
+                    var top = isStartDay ? appt.StartTime.Hour * 60 + appt.StartTime.Minute : 0;
+                    var endMinutes = isEndDay ? appt.EndTime.Hour * 60 + appt.EndTime.Minute : 1440;
+                    
+                    var height = Math.Max(22, endMinutes - top);
+                    height = Math.Min(height, 1440 - top); // Clamp to end of day
                     var a = appt;
                     <div class="event-block-day"
                          style="top:@(top)px;height:@(height)px;background:@appt.Color"
@@ -80,8 +79,7 @@
 </div>
 
 @code {
-    private IEnumerable<Appointment> _allDay = Enumerable.Empty<Appointment>();
-    private IEnumerable<Appointment> _timed  = Enumerable.Empty<Appointment>();
+    private IEnumerable<Appointment> _timed = Array.Empty<Appointment>();
 
     private bool _isDragging;
     private int  _dragStartSlot;
@@ -119,10 +117,9 @@
     {
         var uid = AuthService.CurrentUser?.Id ?? string.Empty;
         var all = AppointmentService.GetByUser(uid)
-                      .Where(a => a.StartTime.Date == State.CurrentDate.Date)
+                      .Where(a => a.StartTime.Date <= State.CurrentDate.Date && a.EndTime.Date >= State.CurrentDate.Date)
                       .ToList();
-        _allDay = all.Where(a => a.IsAllDay);
-        _timed  = all.Where(a => !a.IsAllDay);
+        _timed  = all;
     }
 
     private static string FormatHour(int h) =>

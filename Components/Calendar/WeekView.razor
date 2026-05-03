@@ -20,21 +20,7 @@
         <div class="header-scroll-gutter"></div>
     </div>
 
-    <!-- ── All-day strip ─────────────────────────────────── -->
-    <div class="allday-strip">
-        <div class="gutter-cell allday-label">Cả ngày</div>
-        @for (int i = 0; i < 7; i++)
-        {
-            var day = _weekStart.AddDays(i);
-            <div class="allday-col">
-                @foreach (var appt in GetAllDayFor(day))
-                {
-                    <div class="event-pill" style="background:@appt.Color" title="@appt.Name">@appt.Name</div>
-                }
-            </div>
-        }
-        <div class="header-scroll-gutter"></div>
-    </div>
+
 
     <!-- ── Scrollable time body ───────────────────────────── -->
     <div class="time-body" id="time-body"
@@ -81,8 +67,17 @@
                     <!-- Event blocks -->
                     @foreach (var appt in dayAppts)
                     {
-                        var top    = appt.StartTime.Hour * 60 + appt.StartTime.Minute;
-                        var height = Math.Max(22, (int)appt.Duration.TotalMinutes);
+                        var isStartDay = appt.StartTime.Date == day.Date;
+                        var isEndDay   = appt.EndTime.Date == day.Date;
+
+                        if (!isStartDay && isEndDay && appt.EndTime.Hour == 0 && appt.EndTime.Minute == 0)
+                            continue; // Ends exactly at midnight, don't draw on the new day
+
+                        var top = isStartDay ? appt.StartTime.Hour * 60 + appt.StartTime.Minute : 0;
+                        var endMinutes = isEndDay ? appt.EndTime.Hour * 60 + appt.EndTime.Minute : 1440;
+                        
+                        var height = Math.Max(22, endMinutes - top);
+                        height = Math.Min(height, 1440 - top); // Clamp to end of day
                         var a = appt;
                         <div class="event-block"
                              style="top:@(top)px;height:@(height)px;background:@appt.Color"
@@ -153,11 +148,8 @@
             .ToList();
     }
 
-    private IEnumerable<Appointment> GetAllDayFor(DateTime day) =>
-        _appointments.Where(a => a.IsAllDay && a.StartTime.Date == day.Date);
-
     private IEnumerable<Appointment> GetTimedFor(DateTime day) =>
-        _appointments.Where(a => !a.IsAllDay && a.StartTime.Date == day.Date);
+        _appointments.Where(a => a.StartTime.Date <= day.Date && a.EndTime.Date >= day.Date);
 
     private static string FormatHour(int h) =>
         h == 0 ? "" : h < 12 ? $"{h} AM" : h == 12 ? "12 PM" : $"{h - 12} PM";

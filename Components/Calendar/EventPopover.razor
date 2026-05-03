@@ -18,13 +18,13 @@
                 <div class="ep-row">
                     <span class="ep-icon">🕐</span>
                     <span>
-                        @if (appt.IsAllDay)
+                        @if (appt.StartTime.Date == appt.EndTime.Date)
                         {
-                            @($"Cả ngày · {appt.StartTime:dddd, d MMMM yyyy}")
+                            @($"{appt.StartTime:HH:mm} – {appt.EndTime:HH:mm} · {appt.StartTime:dddd, d MMMM yyyy}")
                         }
                         else
                         {
-                            @($"{appt.StartTime:HH:mm} – {appt.EndTime:HH:mm} · {appt.StartTime:dddd, d MMMM yyyy}")
+                            @($"{appt.StartTime:HH:mm, d MMMM} – {appt.EndTime:HH:mm, d MMMM yyyy}")
                         }
                     </span>
                 </div>

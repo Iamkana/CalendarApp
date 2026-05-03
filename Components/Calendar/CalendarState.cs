@@ -8,7 +8,7 @@ public class CalendarState
 {
     public DateTime CurrentDate { get; private set; } = DateTime.Today;
     public ViewMode ViewMode { get; private set; } = ViewMode.Week;
-    public HashSet<string> VisibleGroups { get; private set; } = new() { "Thịnh Đặng Bá", "Gia đình", "Tasks" };
+
 
     // ── Add-form panel ────────────────────────────────────────────────────────
     public bool IsAddFormOpen    { get; private set; }
@@ -50,11 +50,7 @@ public class CalendarState
 
     public void SetViewMode(ViewMode mode) { ViewMode = mode; Notify(); }
 
-    public void ToggleGroup(string group)
-    {
-        if (!VisibleGroups.Remove(group)) VisibleGroups.Add(group);
-        Notify();
-    }
+
 
     public void OpenAddForm(DateTime? preselected = null, DateTime? preselectedEnd = null)
     {
