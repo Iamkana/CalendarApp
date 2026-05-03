@@ -1,0 +1,15 @@
+@page "/"
+@inject AuthService AuthService
+@inject NavigationManager Nav
+@using CalendarApp.Services
+@using CalendarApp.Components.Calendar
+
+@code {
+    protected override void OnInitialized()
+    {
+        if (!AuthService.IsAuthenticated)
+            Nav.NavigateTo("/login");
+    }
+}
+
+<CalendarGrid />

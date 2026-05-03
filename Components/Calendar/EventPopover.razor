@@ -1,0 +1,95 @@
+@implements IDisposable
+@inject CalendarState State
+@inject IAppointmentService AppointmentService
+
+@if (State.IsEventDetailOpen && State.SelectedEvent is { } appt)
+{
+    <div class="ep-overlay" @onclick="State.CloseEventDetail">
+        <div class="ep-card" @onclick:stopPropagation="true">
+
+            <!-- Coloured header stripe -->
+            <div class="ep-header" style="background:@appt.Color">
+                <span class="ep-header-title">@appt.Name</span>
+                <button class="ep-close-btn" @onclick="State.CloseEventDetail" title="Đóng">✕</button>
+            </div>
+
+            <!-- Details body -->
+            <div class="ep-body">
+                <div class="ep-row">
+                    <span class="ep-icon">🕐</span>
+                    <span>
+                        @if (appt.IsAllDay)
+                        {
+                            @($"Cả ngày · {appt.StartTime:dddd, d MMMM yyyy}")
+                        }
+                        else
+                        {
+                            @($"{appt.StartTime:HH:mm} – {appt.EndTime:HH:mm} · {appt.StartTime:dddd, d MMMM yyyy}")
+                        }
+                    </span>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(appt.Location))
+                {
+                    <div class="ep-row">
+                        <span class="ep-icon">📍</span>
+                        <span>@appt.Location</span>
+                    </div>
+                }
+
+                @if (appt.ReminderMinutes > 0)
+                {
+                    <div class="ep-row">
+                        <span class="ep-icon">🔔</span>
+                        <span>@FormatReminder(appt.ReminderMinutes)</span>
+                    </div>
+                }
+
+                @if (appt.IsGroupMeeting)
+                {
+                    <div class="ep-row">
+                        <span class="ep-icon">👥</span>
+                        <span>Cuộc họp nhóm · @appt.Attendees.Count người tham gia</span>
+                    </div>
+                }
+            </div>
+
+            <!-- Actions -->
+            <div class="ep-footer">
+                <button class="btn btn-ghost ep-delete-btn" @onclick="DeleteEvent" id="btn-delete-event">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                        <path d="M10 11v6M14 11v6"/>
+                        <path d="M9 6V4h6v2"/>
+                    </svg>
+                    Xoá lịch
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    protected override void OnInitialized() => State.OnChange += StateHasChanged;
+    public void Dispose()                    => State.OnChange -= StateHasChanged;
+
+    private void DeleteEvent()
+    {
+        if (State.SelectedEvent is null) return;
+        AppointmentService.DeleteAppointment(State.SelectedEvent.Id);
+        State.CloseEventDetail();
+    }
+
+    private static string FormatReminder(int min) => min switch
+    {
+        5    => "Nhắc trước 5 phút",
+        10   => "Nhắc trước 10 phút",
+        15   => "Nhắc trước 15 phút",
+        30   => "Nhắc trước 30 phút",
+        60   => "Nhắc trước 1 giờ",
+        120  => "Nhắc trước 2 giờ",
+        1440 => "Nhắc trước 1 ngày",
+        _    => $"Nhắc trước {min} phút",
+    };
+}

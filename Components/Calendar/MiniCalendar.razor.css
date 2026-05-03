@@ -1,0 +1,77 @@
+.mini-cal {
+    padding: 4px 6px 8px;
+}
+
+.mini-cal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 4px 6px;
+}
+
+.mini-month-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.mini-nav {
+    width: 28px;
+    height: 28px;
+    font-size: 18px;
+    color: var(--text-secondary);
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--transition-fast);
+}
+.mini-nav:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+.mini-cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+.mini-dow {
+    font-size: 10px;
+    color: var(--text-secondary);
+    text-align: center;
+    padding: 2px 0 4px;
+    font-weight: 500;
+}
+
+.mini-day {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    border-radius: 50%;
+    color: var(--text-primary);
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    transition: background var(--transition-fast);
+    font-family: var(--font-base);
+}
+.mini-day:hover { background: var(--bg-hover); }
+.mini-day.today {
+    color: var(--accent-blue);
+    font-weight: 700;
+}
+.mini-day.selected {
+    background: var(--accent-blue);
+    color: #fff;
+    font-weight: 600;
+}
+.mini-day.today.selected {
+    background: var(--accent-blue);
+    color: #fff;
+}

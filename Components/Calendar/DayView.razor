@@ -1,0 +1,160 @@
+@implements IDisposable
+@inject CalendarState State
+@inject IAppointmentService AppointmentService
+@inject AuthService AuthService
+
+<div class="day-view">
+    <!-- Header -->
+    <div class="day-header">
+        <div class="gutter-cell"></div>
+        <div class="day-col-header @(State.CurrentDate.Date == DateTime.Today ? "today" : "")">
+            <span class="dow-full">@State.CurrentDate.ToString("dddd")</span>
+            <span class="date-big @(State.CurrentDate.Date == DateTime.Today ? "today-circle" : "")">
+                @State.CurrentDate.Day
+            </span>
+        </div>
+    </div>
+
+    <!-- All-day strip -->
+    <div class="day-allday-strip">
+        <div class="gutter-cell allday-lbl">Cả ngày</div>
+        <div class="allday-area">
+            @foreach (var a in _allDay)
+            {
+                <div class="event-pill" style="background:@a.Color">@a.Name</div>
+            }
+        </div>
+    </div>
+
+    <!-- Scrollable body -->
+    <div class="time-body-day" @onmouseup="OnBodyMouseUp" @onmouseleave="CancelDrag">
+        <div class="time-grid-day">
+            <div class="hour-gutter-day">
+                @for (int h = 0; h < 24; h++)
+                {
+                    <div class="hour-label-day">@FormatHour(h)</div>
+                }
+            </div>
+            <div class="single-day-col">
+                <!-- 48 × 30-min drag slots -->
+                @for (int s = 0; s < 48; s++)
+                {
+                    var slot = s;
+                    <div class="half-slot-day"
+                         @onmousedown:preventDefault="true"
+                         @onmousedown="() => StartDrag(slot)"
+                         @onmouseenter="() => UpdateDrag(slot)">
+                    </div>
+                }
+
+                <!-- Drag preview -->
+                @if (_isDragging)
+                {
+                    var top    = Math.Min(_dragStartSlot, _dragEndSlot) * 30;
+                    var height = (Math.Abs(_dragEndSlot - _dragStartSlot) + 1) * 30;
+                    <div class="drag-preview-day" style="top:@(top)px;height:@(height)px">
+                        <span class="drag-label-day">@DragLabel</span>
+                    </div>
+                }
+
+                <!-- Events -->
+                @foreach (var appt in _timed)
+                {
+                    var top    = appt.StartTime.Hour * 60 + appt.StartTime.Minute;
+                    var height = Math.Max(22, (int)appt.Duration.TotalMinutes);
+                    var a = appt;
+                    <div class="event-block-day"
+                         style="top:@(top)px;height:@(height)px;background:@appt.Color"
+                         title="@appt.Name"
+                         @onmousedown:stopPropagation="true"
+                         @onclick:stopPropagation="true"
+                         @onclick="() => State.OpenEventDetail(a)">
+                        <span class="event-name-day">@appt.Name</span>
+                        @if (!string.IsNullOrEmpty(appt.Location))
+                        { <span class="event-loc-day">@appt.Location</span> }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private IEnumerable<Appointment> _allDay = Enumerable.Empty<Appointment>();
+    private IEnumerable<Appointment> _timed  = Enumerable.Empty<Appointment>();
+
+    private bool _isDragging;
+    private int  _dragStartSlot;
+    private int  _dragEndSlot;
+
+    private string DragLabel
+    {
+        get
+        {
+            var s = Math.Min(_dragStartSlot, _dragEndSlot) * 30;
+            var e = (Math.Max(_dragStartSlot, _dragEndSlot) + 1) * 30;
+            return $"{Fmt(s)} – {Fmt(e)}";
+        }
+    }
+
+    private static string Fmt(int min)
+    {
+        var h = min / 60; var m = min % 60;
+        var sfx = h < 12 ? "AM" : "PM";
+        var h12 = h == 0 ? 12 : h > 12 ? h - 12 : h;
+        return m == 0 ? $"{h12} {sfx}" : $"{h12}:{m:D2} {sfx}";
+    }
+
+    protected override void OnInitialized()
+    {
+        Refresh();
+        State.OnChange += OnStateChanged;
+        AppointmentService.OnAppointmentsChanged += OnAppointmentsChanged;
+    }
+
+    private void OnStateChanged()       { Refresh(); InvokeAsync(StateHasChanged); }
+    private void OnAppointmentsChanged() { Refresh(); InvokeAsync(StateHasChanged); }
+
+    private void Refresh()
+    {
+        var uid = AuthService.CurrentUser?.Id ?? string.Empty;
+        var all = AppointmentService.GetByUser(uid)
+                      .Where(a => a.StartTime.Date == State.CurrentDate.Date)
+                      .ToList();
+        _allDay = all.Where(a => a.IsAllDay);
+        _timed  = all.Where(a => !a.IsAllDay);
+    }
+
+    private static string FormatHour(int h) =>
+        h == 0 ? "" : h < 12 ? $"{h} AM" : h == 12 ? "12 PM" : $"{h - 12} PM";
+
+    private void StartDrag(int slot)
+    {
+        _isDragging    = true;
+        _dragStartSlot = slot;
+        _dragEndSlot   = slot;
+    }
+
+    private void UpdateDrag(int slot)
+    {
+        if (!_isDragging) return;
+        _dragEndSlot = slot;
+    }
+
+    private void OnBodyMouseUp()
+    {
+        if (!_isDragging) return;
+        _isDragging = false;
+        var start = State.CurrentDate.Date.AddMinutes(Math.Min(_dragStartSlot, _dragEndSlot) * 30);
+        var end   = State.CurrentDate.Date.AddMinutes((Math.Max(_dragStartSlot, _dragEndSlot) + 1) * 30);
+        State.OpenAddForm(start, end);
+    }
+
+    private void CancelDrag() => _isDragging = false;
+
+    public void Dispose()
+    {
+        State.OnChange -= OnStateChanged;
+        AppointmentService.OnAppointmentsChanged -= OnAppointmentsChanged;
+    }
+}

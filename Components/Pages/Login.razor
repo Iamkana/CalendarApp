@@ -1,0 +1,79 @@
+@page "/login"
+@layout LoginLayout
+@inject AuthService AuthService
+@inject NavigationManager Nav
+
+<div class="auth-card">
+    <div class="auth-logo">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <rect width="32" height="32" rx="8" fill="#4285f4"/>
+            <path d="M8 12h16M8 16h10M8 20h13" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span class="auth-logo-text">Lịch</span>
+    </div>
+
+    <h1 class="auth-title">Đăng nhập</h1>
+    <p class="auth-sub">Chào mừng trở lại! Vui lòng đăng nhập để tiếp tục.</p>
+
+    <div class="auth-form">
+        <div class="auth-field">
+            <label for="login-email">Email</label>
+            <input id="login-email" type="email" class="auth-input"
+                   placeholder="example@domain.com"
+                   @bind="_email" @bind:event="oninput"
+                   @onkeydown="OnKeyDown" autocomplete="email" />
+        </div>
+
+        <div class="auth-field">
+            <label for="login-password">Mật khẩu</label>
+            <input id="login-password" type="password" class="auth-input"
+                   placeholder="••••••••"
+                   @bind="_password" @bind:event="oninput"
+                   @onkeydown="OnKeyDown" autocomplete="current-password" />
+        </div>
+
+        @if (_error is not null)
+        {
+            <div class="auth-error">@_error</div>
+        }
+
+        <button class="btn btn-primary auth-btn"
+                id="btn-login"
+                disabled="@(!CanLogin)"
+                @onclick="DoLogin">
+            Đăng nhập
+        </button>
+
+        <p class="auth-link">
+            Chưa có tài khoản?
+            <a href="/register">Đăng ký ngay</a>
+        </p>
+    </div>
+</div>
+
+@code {
+    private string _email    = string.Empty;
+    private string _password = string.Empty;
+    private string? _error;
+
+    private bool CanLogin => !string.IsNullOrWhiteSpace(_email) && !string.IsNullOrWhiteSpace(_password);
+
+    protected override void OnInitialized()
+    {
+        if (AuthService.IsAuthenticated) Nav.NavigateTo("/");
+    }
+
+    private void DoLogin()
+    {
+        _error = null;
+        if (!AuthService.Login(_email.Trim(), _password))
+            _error = "Email hoặc mật khẩu không đúng. Vui lòng thử lại.";
+        else
+            Nav.NavigateTo("/");
+    }
+
+    private void OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && CanLogin) DoLogin();
+    }
+}

@@ -1,0 +1,18 @@
+@implements IDisposable
+@inject CalendarState State
+
+<aside class="sidebar">
+    <!-- Create button -->
+    <button class="btn-create" id="btn-create" @onclick="() => State.OpenAddForm(DateTime.Now)">
+        <span class="icon-plus">+</span>
+        <span>Tạo</span>
+    </button>
+
+    <!-- Mini Calendar -->
+    <MiniCalendar />
+</aside>
+
+@code {
+    protected override void OnInitialized() => State.OnChange += StateHasChanged;
+    public void Dispose()                    => State.OnChange -= StateHasChanged;
+}

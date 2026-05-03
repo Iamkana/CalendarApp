@@ -1,0 +1,105 @@
+/* ── Overlay ─────────────────────────────────────────────── */
+.ep-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--bg-overlay);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 500;
+    animation: fadeIn 0.15s ease;
+    padding: 24px;
+}
+
+/* ── Card ────────────────────────────────────────────────── */
+.ep-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    width: min(380px, 100%);
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+    animation: fadeSlideIn 0.2s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── Coloured header ─────────────────────────────────────── */
+.ep-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px 14px 18px;
+    gap: 12px;
+}
+
+.ep-header-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ep-close-btn {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: #fff;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+    transition: background var(--transition-fast);
+}
+.ep-close-btn:hover { background: rgba(255,255,255,0.35); }
+
+/* ── Body ────────────────────────────────────────────────── */
+.ep-body {
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ep-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+.ep-icon {
+    font-size: 15px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+/* ── Footer ──────────────────────────────────────────────── */
+.ep-footer {
+    padding: 8px 12px 12px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+}
+
+.ep-delete-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--accent-red) !important;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 7px 14px;
+    border-radius: var(--radius-sm);
+    transition: background var(--transition-fast);
+}
+.ep-delete-btn:hover { background: rgba(234,67,53,0.12) !important; }

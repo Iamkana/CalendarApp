@@ -1,0 +1,23 @@
+@implements IDisposable
+@inject CalendarState State
+
+
+<div class="calendar-grid-wrapper">
+    @switch (State.ViewMode)
+    {
+        case ViewMode.Week:
+            <WeekView />
+            break;
+        case ViewMode.Month:
+            <MonthView />
+            break;
+        case ViewMode.Day:
+            <DayView />
+            break;
+    }
+</div>
+
+@code {
+    protected override void OnInitialized() => State.OnChange += StateHasChanged;
+    public void Dispose() => State.OnChange -= StateHasChanged;
+}

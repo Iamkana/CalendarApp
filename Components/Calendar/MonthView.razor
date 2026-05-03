@@ -1,0 +1,87 @@
+@implements IDisposable
+@inject CalendarState State
+@inject IAppointmentService AppointmentService
+@inject AuthService AuthService
+
+<div class="month-view">
+    <!-- Day-of-week header -->
+    <div class="month-header">
+        @foreach (var d in DayNames)
+        {
+            <div class="month-dow">@d</div>
+        }
+    </div>
+
+    <!-- Calendar grid -->
+    <div class="month-grid">
+        @foreach (var cell in _cells)
+        {
+            var isToday   = cell == DateTime.Today;
+            var isCurMonth = cell.Month == _viewDate.Month;
+            var appts = GetFor(cell);
+            <div class="month-cell @(isToday ? "today" : "") @(!isCurMonth ? "other-month" : "")"
+                 @onclick="() => OnCellClick(cell)">
+                <div class="month-cell-number @(isToday ? "today-circle" : "")">@cell.Day</div>
+                @foreach (var a in appts.Take(3))
+                {
+                    var ev = a;
+                    <div class="month-event-pill"
+                         style="background:@a.Color"
+                         title="@a.Name"
+                         @onclick:stopPropagation="true"
+                         @onclick="() => State.OpenEventDetail(ev)">@a.Name</div>
+                }
+                @if (appts.Count() > 3)
+                {
+                    <div class="month-more">+@(appts.Count() - 3) nữa</div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private static readonly string[] DayNames = { "Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy" };
+    private DateTime _viewDate;
+    private List<DateTime> _cells = new();
+    private IEnumerable<Appointment> _appointments = Enumerable.Empty<Appointment>();
+
+    protected override void OnInitialized()
+    {
+        Refresh();
+        State.OnChange += OnStateChanged;
+        AppointmentService.OnAppointmentsChanged += OnAppointmentsChanged;
+    }
+
+    private void OnStateChanged() { Refresh(); InvokeAsync(StateHasChanged); }
+    private void OnAppointmentsChanged() { Refresh(); InvokeAsync(StateHasChanged); }
+
+    private void Refresh()
+    {
+        _viewDate     = new DateTime(State.CurrentDate.Year, State.CurrentDate.Month, 1);
+        _cells        = BuildCells(_viewDate);
+        var userId    = AuthService.CurrentUser?.Id ?? string.Empty;
+        _appointments = AppointmentService
+            .GetByUser(userId)
+            .ToList();
+    }
+
+    private static List<DateTime> BuildCells(DateTime firstOfMonth)
+    {
+        var cells = new List<DateTime>();
+        var start = firstOfMonth.AddDays(-(int)firstOfMonth.DayOfWeek);
+        for (int i = 0; i < 42; i++) cells.Add(start.AddDays(i));
+        return cells;
+    }
+
+    private IEnumerable<Appointment> GetFor(DateTime day) =>
+        _appointments.Where(a => a.StartTime.Date == day.Date);
+
+    private void OnCellClick(DateTime day) => State.OpenAddForm(day.Date.AddHours(9));
+
+    public void Dispose()
+    {
+        State.OnChange -= OnStateChanged;
+        AppointmentService.OnAppointmentsChanged -= OnAppointmentsChanged;
+    }
+}

@@ -1,0 +1,218 @@
+.week-view {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg-primary);
+}
+
+/* ── Header row ─────────────────────────────────────────── */
+.week-header {
+    display: grid;
+    /* 6px matches the scrollbar width defined in app.css ::-webkit-scrollbar */
+    grid-template-columns: var(--gutter-width) repeat(7, 1fr) 6px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    flex-shrink: 0;
+}
+
+/* placeholder that reserves the same width as the scrollbar */
+.header-scroll-gutter {
+    background: var(--bg-primary);
+}
+
+.gutter-cell {
+    width: var(--gutter-width);
+    flex-shrink: 0;
+}
+
+.day-col-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 0 6px;
+    gap: 4px;
+    border-left: 1px solid var(--border-color);
+    cursor: default;
+}
+
+.dow-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.day-col-header.today .dow-label { color: var(--accent-blue); }
+
+.date-number {
+    font-size: 20px;
+    font-weight: 400;
+    color: var(--text-primary);
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.date-number.today-circle {
+    background: var(--accent-blue);
+    color: #fff;
+    font-weight: 600;
+}
+
+/* ── All-day strip ──────────────────────────────────────── */
+.allday-strip {
+    display: grid;
+    grid-template-columns: var(--gutter-width) repeat(7, 1fr) 6px;
+    min-height: 28px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    flex-shrink: 0;
+}
+
+.allday-label {
+    font-size: 10px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 8px;
+}
+
+.allday-col {
+    border-left: 1px solid var(--border-color);
+    padding: 2px 3px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.event-pill {
+    border-radius: 3px;
+    padding: 2px 6px;
+    font-size: 11px;
+    font-weight: 500;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+}
+
+/* ── Scrollable time body ───────────────────────────────── */
+.time-body {
+    flex: 1;
+    overflow-y: scroll; /* always reserve scrollbar space — keeps columns aligned with header */
+    overflow-x: hidden;
+}
+
+.time-grid {
+    display: grid;
+    grid-template-columns: var(--gutter-width) repeat(7, 1fr);
+    min-height: calc(24 * var(--hour-height));
+}
+
+/* ── Time gutter ────────────────────────────────────────── */
+.hour-gutter {
+    position: sticky;
+    left: 0;
+    background: var(--bg-primary);
+    z-index: 2;
+}
+
+.hour-label {
+    height: var(--hour-height);
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding-right: 8px;
+    padding-top: 2px;
+    font-size: 10px;
+    color: var(--text-secondary);
+    position: relative;
+    top: -8px;
+    user-select: none;
+}
+
+/* ── Day column ─────────────────────────────────────────── */
+.day-column {
+    position: relative;
+    border-left: 1px solid var(--border-color);
+    cursor: crosshair;
+}
+
+/* ── Half-slots (30px = 30 minutes) ─────────────────────── */
+.half-slot {
+    height: 30px;
+    border-top: 1px solid var(--hour-line);
+    user-select: none;
+}
+/* Even children = half-hour marks (dashed) */
+.half-slot:nth-child(even) {
+    border-top: 1px dashed var(--half-line);
+}
+/* First child (midnight) = no top border */
+.half-slot:first-child { border-top: none; }
+
+/* ── Drag preview ───────────────────────────────────────── */
+.drag-preview {
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    background: rgba(66, 133, 244, 0.25);
+    border: 1.5px solid var(--accent-blue);
+    border-radius: 4px;
+    pointer-events: none;
+    z-index: 3;
+    display: flex;
+    align-items: flex-start;
+    padding: 3px 6px;
+    overflow: hidden;
+}
+
+.drag-preview-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent-blue);
+    white-space: nowrap;
+}
+
+/* ── Event block ────────────────────────────────────────── */
+.event-block {
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    border-radius: 4px;
+    padding: 3px 6px;
+    overflow: hidden;
+    cursor: pointer;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    transition: filter var(--transition-fast), transform var(--transition-fast);
+    pointer-events: all;
+}
+.event-block:hover { filter: brightness(1.15); z-index: 2; }
+
+.event-name {
+    font-size: 11px;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.event-loc {
+    font-size: 10px;
+    color: rgba(255,255,255,0.8);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

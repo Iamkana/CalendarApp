@@ -1,0 +1,52 @@
+@implements IDisposable
+@inject CalendarState State
+
+<div class="mini-cal">
+    <!-- Month navigation -->
+    <div class="mini-cal-header">
+        <span class="mini-month-label">@_displayDate.ToString("MMMM yyyy")</span>
+        <div style="display:flex;gap:2px">
+            <button class="btn-icon mini-nav" @onclick="PrevMonth" title="Tháng trước">&#8249;</button>
+            <button class="btn-icon mini-nav" @onclick="NextMonth" title="Tháng sau">&#8250;</button>
+        </div>
+    </div>
+
+    <!-- Day-of-week headers -->
+    <div class="mini-cal-grid">
+        @foreach (var d in _dowHeaders)
+        {
+            <div class="mini-dow">@d</div>
+        }
+
+        <!-- Blank cells before first day -->
+        @for (int i = 0; i < _firstDow; i++)
+        {
+            <div></div>
+        }
+
+        <!-- Day cells -->
+        @for (int day = 1; day <= DateTime.DaysInMonth(_displayDate.Year, _displayDate.Month); day++)
+        {
+            var date = new DateTime(_displayDate.Year, _displayDate.Month, day);
+            var isToday     = date == DateTime.Today;
+            var isSelected  = date == State.CurrentDate.Date;
+            <button class="mini-day @(isToday ? "today" : "") @(isSelected ? "selected" : "")"
+                    @onclick="() => SelectDate(date)">
+                @day
+            </button>
+        }
+    </div>
+</div>
+
+@code {
+    private DateTime _displayDate = DateTime.Today;
+    private static readonly string[] _dowHeaders = { "CN", "T2", "T3", "T4", "T5", "T6", "T7" };
+    private int _firstDow => (int)new DateTime(_displayDate.Year, _displayDate.Month, 1).DayOfWeek;
+
+    protected override void OnInitialized() => State.OnChange += StateHasChanged;
+    public void Dispose() => State.OnChange -= StateHasChanged;
+
+    private void PrevMonth() => _displayDate = _displayDate.AddMonths(-1);
+    private void NextMonth() => _displayDate = _displayDate.AddMonths(1);
+    private void SelectDate(DateTime date) => State.SetDate(date);
+}

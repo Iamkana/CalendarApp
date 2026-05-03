@@ -1,0 +1,45 @@
+@inherits LayoutComponentBase
+@implements IDisposable
+@inject AuthService AuthService
+@inject NavigationManager Nav
+@inject CalendarState State
+
+@code {
+    protected override void OnInitialized()
+    {
+        AuthService.OnAuthChanged += OnAuthChanged;
+        State.OnChange += StateHasChanged;
+    }
+
+    private void OnAuthChanged()
+    {
+        if (!AuthService.IsAuthenticated)
+            Nav.NavigateTo("/login", forceLoad: false);
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        AuthService.OnAuthChanged -= OnAuthChanged;
+        State.OnChange -= StateHasChanged;
+    }
+}
+
+<div class="app-shell">
+    @if (AuthService.IsAuthenticated)
+    {
+        <Sidebar />
+        <div class="main-area">
+            <Topbar />
+            <div class="calendar-content">
+                @Body
+            </div>
+        </div>
+        <AddAppointment />
+        <EventPopover />
+    }
+    else
+    {
+        @Body
+    }
+</div>

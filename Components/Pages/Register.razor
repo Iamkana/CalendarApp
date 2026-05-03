@@ -1,0 +1,102 @@
+@page "/register"
+@layout LoginLayout
+@inject AuthService AuthService
+@inject NavigationManager Nav
+
+<div class="auth-card">
+    <div class="auth-logo">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <rect width="32" height="32" rx="8" fill="#4285f4"/>
+            <path d="M8 12h16M8 16h10M8 20h13" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span class="auth-logo-text">Lịch</span>
+    </div>
+
+    <h1 class="auth-title">Tạo tài khoản</h1>
+    <p class="auth-sub">Điền thông tin để bắt đầu sử dụng Lịch.</p>
+
+    <div class="auth-form">
+        <div class="auth-field">
+            <label for="reg-name">Họ và tên</label>
+            <input id="reg-name" type="text" class="auth-input"
+                   placeholder="Nguyễn Văn A"
+                   @bind="_fullName" @bind:event="oninput"
+                   @onkeydown="OnKeyDown" autocomplete="name" />
+        </div>
+
+        <div class="auth-field">
+            <label for="reg-email">Email</label>
+            <input id="reg-email" type="email" class="auth-input"
+                   placeholder="example@domain.com"
+                   @bind="_email" @bind:event="oninput"
+                   @onkeydown="OnKeyDown" autocomplete="email" />
+        </div>
+
+        <div class="auth-field">
+            <label for="reg-password">Mật khẩu</label>
+            <input id="reg-password" type="password" class="auth-input"
+                   placeholder="••••••••"
+                   @bind="_password" @bind:event="oninput"
+                   @onkeydown="OnKeyDown" autocomplete="new-password" />
+        </div>
+
+        <div class="auth-field">
+            <label for="reg-confirm">Xác nhận mật khẩu</label>
+            <input id="reg-confirm" type="password" class="auth-input"
+                   placeholder="••••••••"
+                   @bind="_confirm" @bind:event="oninput"
+                   @onkeydown="OnKeyDown" autocomplete="new-password" />
+        </div>
+
+        @if (_error is not null)
+        {
+            <div class="auth-error">@_error</div>
+        }
+
+        <button class="btn btn-primary auth-btn"
+                id="btn-register"
+                disabled="@(!CanRegister)"
+                @onclick="DoRegister">
+            Đăng ký
+        </button>
+
+        <p class="auth-link">
+            Đã có tài khoản?
+            <a href="/login">Đăng nhập</a>
+        </p>
+    </div>
+</div>
+
+@code {
+    private string _fullName = string.Empty;
+    private string _email    = string.Empty;
+    private string _password = string.Empty;
+    private string _confirm  = string.Empty;
+    private string? _error;
+
+    private bool CanRegister =>
+        !string.IsNullOrWhiteSpace(_fullName) &&
+        !string.IsNullOrWhiteSpace(_email)    &&
+        !string.IsNullOrWhiteSpace(_password) &&
+        !string.IsNullOrWhiteSpace(_confirm);
+
+    protected override void OnInitialized()
+    {
+        if (AuthService.IsAuthenticated) Nav.NavigateTo("/");
+    }
+
+    private void DoRegister()
+    {
+        _error = null;
+        if (_password != _confirm)   { _error = "Mật khẩu xác nhận không khớp."; return; }
+        if (_password.Length < 4)    { _error = "Mật khẩu phải có ít nhất 4 ký tự."; return; }
+        var err = AuthService.Register(_fullName, _email, _password);
+        if (err is not null) { _error = err; return; }
+        Nav.NavigateTo("/");
+    }
+
+    private void OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && CanRegister) DoRegister();
+    }
+}
