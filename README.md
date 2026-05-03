@@ -6,15 +6,18 @@
 ## Cài đặt và Chạy ứng dụng
 
 ### Yêu cầu hệ thống
-- [.NET 10 SDK](https://dotnet.microsoft.com/download)
-- Khuyến nghị dùng Visual Studio 2022 hoặc VS Code với extension C# Dev Kit.
+- Bắt buộc: **[.NET 10 SDK](https://dotnet.microsoft.com/download)**.
 - Môi trường tương ứng với nền tảng đích: Windows (chạy target Windows) hoặc macOS (chạy target Mac Catalyst).
 
 ### Cách chạy ứng dụng
 
 1. Clone hoặc tải mã nguồn về máy.
 2. Mở Command Prompt, Terminal hoặc PowerShell tại thư mục gốc của dự án (nơi chứa file `CalendarApp.csproj`).
-3. Chạy lệnh tương ứng với hệ điều hành của bạn:
+3. Cài đặt các công cụ MAUI (Chỉ cần chạy lệnh này 1 lần duy nhất trên máy của bạn):
+```bash
+dotnet workload install maui
+```
+4. Chạy lệnh tương ứng với hệ điều hành của bạn:
 
 **Trên Windows:**
 ```bash
