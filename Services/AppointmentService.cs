@@ -41,12 +41,12 @@ public class AppointmentService : IAppointmentService
         OnAppointmentsChanged?.Invoke();
     }
 
-    public void ReplaceAppointment(Guid oldId, Appointment newAppointment)
+    public void ReplaceAppointments(IEnumerable<Guid> oldIds, Appointment newAppointment)
     {
-        var old = _db.Appointments.FirstOrDefault(a => a.Id == oldId);
-        if (old is not null)
+        var toRemove = _db.Appointments.Where(a => oldIds.Contains(a.Id)).ToList();
+        if (toRemove.Any())
         {
-            _db.Appointments.Remove(old);
+            _db.Appointments.RemoveRange(toRemove);
         }
         
         _db.Appointments.Add(newAppointment);
@@ -68,14 +68,14 @@ public class AppointmentService : IAppointmentService
     }
 
     // ── Conflict checks ───────────────────────────────────────────────────────
-    public Appointment? CheckConflict(Appointment appointment)
+    public List<Appointment> CheckConflicts(Appointment appointment)
     {
         var appointments = _db.Appointments.AsNoTracking().ToList();
-        return appointments.FirstOrDefault(a =>
+        return appointments.Where(a =>
             a.Id != appointment.Id &&
             (a.OwnerId == appointment.OwnerId || a.Attendees.Contains(appointment.OwnerId)) &&
             a.StartTime < appointment.EndTime &&
-            a.EndTime   > appointment.StartTime);
+            a.EndTime   > appointment.StartTime).ToList();
     }
 
     public Appointment? CheckGroupMeetingMatch(Appointment appointment)

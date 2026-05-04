@@ -99,12 +99,23 @@
             </div>
 
             <!-- ── Conflict / Group-match Alerts ─────────────────────── -->
-            @if (_conflictAppt is not null && _groupMatch is null)
+            @if (_conflicts.Any() && _groupMatch is null)
             {
                 <div class="alert alert-warning">
-                    <span>⚠️ Bạn đã có cuộc hẹn <strong>"@_conflictAppt.Name"</strong> vào thời điểm này.</span>
+                    @if (_conflicts.Count == 1)
+                    {
+                        <span>⚠️ Bạn đã có cuộc hẹn <strong>"@_conflicts[0].Name"</strong> vào thời điểm này.</span>
+                    }
+                    else
+                    {
+                        <span>⚠️ Bạn đã có <strong>@_conflicts.Count</strong> cuộc hẹn trùng vào thời điểm này: 
+                            @(string.Join(", ", _conflicts.Select(c => $"\"{c.Name}\"")))
+                        </span>
+                    }
                     <div class="alert-actions">
-                        <button class="btn btn-primary" @onclick="ReplaceOld">Thay thế cuộc hẹn cũ</button>
+                        <button class="btn btn-primary" @onclick="ReplaceOld">
+                            @(_conflicts.Count == 1 ? "Thay thế cuộc hẹn cũ" : "Thay thế các cuộc hẹn cũ")
+                        </button>
                         <button class="btn btn-ghost" @onclick="ClearAlert">Chọn thời gian khác</button>
                     </div>
                 </div>
@@ -137,7 +148,7 @@
     private int      _reminderMinutes = 0;
 
     // ── Conflict state ────────────────────────────────────────────────────────
-    private Appointment? _conflictAppt;
+    private List<Appointment> _conflicts = new();
     private Appointment? _groupMatch;
 
     // ── Helpers ───────────────────────────────────────────────────────────────
@@ -155,7 +166,7 @@
     private bool CanSave =>
         !string.IsNullOrWhiteSpace(_name) &&
         _end > _start &&
-        _conflictAppt is null &&
+        !_conflicts.Any() &&
         _groupMatch   is null;
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
@@ -181,7 +192,7 @@
 
         _color           = "#4285f4";
         _reminderMinutes = 0;
-        _conflictAppt    = null;
+        _conflicts       = new();
         _groupMatch      = null;
     }
 
@@ -209,7 +220,7 @@
 
     private void CloseIfBackdrop() => State.CloseAddForm();
 
-    private void ClearAlert() { _conflictAppt = null; _groupMatch = null; }
+    private void ClearAlert() { _conflicts.Clear(); _groupMatch = null; }
 
     // ── Save flow ──────────────────────────────────────────────────────────────
     private void TrySave()
@@ -222,8 +233,8 @@
         if (gm is not null) { _groupMatch = gm; return; }
 
         // 2. Check regular conflict
-        var conflict = AppointmentService.CheckConflict(candidate);
-        if (conflict is not null) { _conflictAppt = conflict; return; }
+        var conflicts = AppointmentService.CheckConflicts(candidate);
+        if (conflicts.Any()) { _conflicts = conflicts; return; }
 
         // 3. All clear → save
         CommitSave(candidate);
@@ -232,7 +243,7 @@
     private void ReplaceOld()
     {
         var candidate = BuildAppointment();
-        AppointmentService.ReplaceAppointment(_conflictAppt!.Id, candidate);
+        AppointmentService.ReplaceAppointments(_conflicts.Select(c => c.Id), candidate);
         ClearAlert();
         State.CloseAddForm();
     }

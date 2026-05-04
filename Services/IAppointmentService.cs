@@ -7,9 +7,9 @@ public interface IAppointmentService
     IEnumerable<Appointment> GetByUser(string ownerId);
     void AddAppointment(Appointment appointment);
     void DeleteAppointment(Guid id);
-    void ReplaceAppointment(Guid oldId, Appointment newAppointment);
+    void ReplaceAppointments(IEnumerable<Guid> oldIds, Appointment newAppointment);
     void JoinGroupMeeting(Guid groupMeetingId, string userId);
-    Appointment? CheckConflict(Appointment appointment);
+    List<Appointment> CheckConflicts(Appointment appointment);
     Appointment? CheckGroupMeetingMatch(Appointment appointment);
     event Action? OnAppointmentsChanged;
 }
