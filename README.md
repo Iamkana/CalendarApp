@@ -1,30 +1,39 @@
-# CalendarApp
+# CalendarApp - OOAD Project
 
-Ứng dụng quản lý thời gian được xây dựng bằng **.NET MAUI Blazor Hybrid** (.NET 10).
-Ứng dụng cho phép quản lý thời gian, tạo cuộc hẹn, họp nhóm, và xem lịch theo ngày/tuần/tháng.
+Đây là dự án hệ thống Lịch (Calendar System) sử dụng kiến trúc **phân lớp (N-Layer)**, xây dựng trên nền tảng **.NET MAUI Blazor Hybrid** để chạy đa nền tảng (Windows, macOS, Mobile). Ứng dụng sử dụng **Entity Framework Core** với cơ sở dữ liệu **SQLite** được tích hợp trực tiếp (Local Database) để quản lý dữ liệu người dùng và cuộc hẹn.
 
 ## Cài đặt và Chạy ứng dụng
 
-### Yêu cầu hệ thống
-- Bắt buộc: **[.NET 10 SDK](https://dotnet.microsoft.com/download)**.
-- Môi trường tương ứng với nền tảng đích: Windows (chạy target Windows) hoặc macOS (chạy target Mac Catalyst).
+### 1. Yêu cầu hệ thống
 
-### Cách chạy ứng dụng
+| Nền tảng | Yêu cầu bắt buộc |
+| :--- | :--- |
+| **Chung** | [.NET 10 SDK](https://dotnet.microsoft.com/download) |
+| **Windows** | Windows 10/11 với [WebView2](https://developer.microsoft.com/vi-vn/microsoft-edge/webview2?form=MA13LH#download) |
+| **macOS** | macOS Sonoma/Sequoia với [Xcode](https://developer.microsoft.com/vi-vn/microsoft-edge/webview2?form=MA13LH#download) (Đã đồng ý điều khoản) |
 
-1. Clone hoặc tải mã nguồn về máy.
-2. Mở Command Prompt, Terminal hoặc PowerShell tại thư mục gốc của dự án (nơi chứa file `CalendarApp.csproj`).
-3. Cài đặt các công cụ MAUI (Chỉ cần chạy lệnh này 1 lần duy nhất trên máy của bạn):
+### 2. Chuẩn bị môi trường
+Mở Terminal và cài đặt MAUI workload:
+
+**Windows:**
 ```bash
 dotnet workload install maui
 ```
-4. Chạy lệnh tương ứng với hệ điều hành của bạn:
 
-**Trên Windows:**
+**macOS:**
+```bash
+sudo dotnet workload install maui
+```
+
+### 3. Khởi chạy
+Mở Terminal tại thư mục gốc của project:
+
+**Windows:**
 ```bash
 dotnet run -f net10.0-windows10.0.19041.0
 ```
 
-**Trên macOS:**
+**macOS:**
 ```bash
 dotnet run -f net10.0-maccatalyst
 ```
