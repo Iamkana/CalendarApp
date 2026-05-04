@@ -14,9 +14,17 @@
 1. Clone hoặc tải mã nguồn về máy.
 2. Mở Command Prompt, Terminal hoặc PowerShell tại thư mục gốc của dự án (nơi chứa file `CalendarApp.csproj`).
 3. Cài đặt các công cụ MAUI (Chỉ cần chạy lệnh này 1 lần duy nhất trên máy của bạn):
+
+**Trên Windows:**
 ```bash
 dotnet workload install maui
 ```
+
+**Trên macOS:**
+```bash
+sudo dotnet workload install maui
+```
+
 4. Chạy lệnh tương ứng với hệ điều hành của bạn:
 
 **Trên Windows:**
