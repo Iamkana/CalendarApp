@@ -1,6 +1,7 @@
 @implements IDisposable
 @inject CalendarState State
 @inject IAppointmentService AppointmentService
+@inject AuthService AuthService
 
 @if (State.IsEventDetailOpen && State.SelectedEvent is { } appt)
 {
@@ -63,7 +64,7 @@
                         <path d="M10 11v6M14 11v6"/>
                         <path d="M9 6V4h6v2"/>
                     </svg>
-                    Xoá lịch
+                    @DeleteButtonLabel
                 </button>
             </div>
         </div>
@@ -74,10 +75,23 @@
     protected override void OnInitialized() => State.OnChange += StateHasChanged;
     public void Dispose()                    => State.OnChange -= StateHasChanged;
 
+    private string DeleteButtonLabel
+    {
+        get
+        {
+            var appt = State.SelectedEvent;
+            var uid  = AuthService.CurrentUser?.Id ?? string.Empty;
+            if (appt is { IsGroupMeeting: true } && appt.OwnerId != uid && appt.Attendees.Contains(uid))
+                return "Rời cuộc họp";
+            return "Xoá lịch";
+        }
+    }
+
     private void DeleteEvent()
     {
         if (State.SelectedEvent is null) return;
-        AppointmentService.DeleteAppointment(State.SelectedEvent.Id);
+        var userId = AuthService.CurrentUser?.Id ?? string.Empty;
+        AppointmentService.DeleteAppointment(State.SelectedEvent.Id, userId);
         State.CloseEventDetail();
     }
 

@@ -31,12 +31,21 @@ public class AppointmentService : IAppointmentService
         OnAppointmentsChanged?.Invoke();
     }
 
-    public void DeleteAppointment(Guid id)
+    public void DeleteAppointment(Guid id, string userId)
     {
         var appt = _db.Appointments.FirstOrDefault(a => a.Id == id);
         if (appt is null) return;
-        
-        _db.Appointments.Remove(appt);
+
+        if (appt.IsGroupMeeting && appt.OwnerId != userId && appt.Attendees.Contains(userId))
+        {
+            appt.Attendees.Remove(userId);
+            _db.Appointments.Update(appt);
+        }
+        else
+        {
+            _db.Appointments.Remove(appt);
+        }
+
         _db.SaveChanges();
         OnAppointmentsChanged?.Invoke();
     }
@@ -84,6 +93,7 @@ public class AppointmentService : IAppointmentService
         return appointments.FirstOrDefault(a =>
             a.IsGroupMeeting &&
             a.Name == appointment.Name &&
-            (a.EndTime - a.StartTime) == appointment.Duration);
+            (a.EndTime - a.StartTime) == appointment.Duration &&
+            a.StartTime == appointment.StartTime);
     }
 }

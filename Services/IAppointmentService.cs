@@ -6,7 +6,7 @@ public interface IAppointmentService
 {
     IEnumerable<Appointment> GetByUser(string ownerId);
     void AddAppointment(Appointment appointment);
-    void DeleteAppointment(Guid id);
+    void DeleteAppointment(Guid id, string userId);
     void ReplaceAppointments(IEnumerable<Guid> oldIds, Appointment newAppointment);
     void JoinGroupMeeting(Guid groupMeetingId, string userId);
     List<Appointment> CheckConflicts(Appointment appointment);
